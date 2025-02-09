@@ -19,7 +19,7 @@ contexts:
     namespace: default
     user: demo4-shanghai-produ
   name: demo4-shanghai-produ-context
-current-context: demo4-shanghai-produ-context
+current-context: demo4-beijing-rep-context
 kind: Config
 preferences: {}
 users:
