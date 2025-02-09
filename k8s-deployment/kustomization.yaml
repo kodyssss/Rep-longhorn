@@ -6,7 +6,7 @@ namespace: mysql-rep-demo
 resources:
   - namespace.yaml
   - mysql-deployment.yaml
-  #- mysql-pvc.yaml
+  - mysql-pvc.yaml
   - mysql-service.yaml
   - flask-deployment.yaml
   - flask-svc.yaml
