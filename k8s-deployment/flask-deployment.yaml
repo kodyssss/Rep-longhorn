@@ -15,6 +15,7 @@ spec:
       initContainers:
       - name: init-mysql
         image: mysql:8.0
+        imagePullPolicy: IfNotPresent
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "rancher"
@@ -22,6 +23,7 @@ spec:
       containers:
       - name: mysql-frontend
         image: mysql-frontend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
         env:
