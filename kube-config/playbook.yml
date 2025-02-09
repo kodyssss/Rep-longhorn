@@ -1,0 +1,34 @@
+---
+- name: Deploy and run create-user.sh, then fetch kubeconfig
+  hosts: rke2
+  tasks:
+    - name: Create directory for kubeconfig
+      file:
+        path: /root/kube-config
+        state: directory
+        mode: '0755'
+
+    - name: Copy create-user.sh to remote host
+      copy:
+        src: /root/Rep-longhorn/kube-config/create-user.sh
+        dest: /root/kube-config/create-user.sh
+        mode: '0755'
+
+    - name: Run create-user.sh script
+      shell: ./create-user.sh
+      args:
+        chdir: /root/kube-config
+      register: script_output
+
+    - name: Find the generated kubeconfig file
+      find:
+        paths: /root/kube-config
+        patterns: "*.kubeconfig"
+      register: kubeconfig_files
+
+    - name: Fetch the kubeconfig files
+      fetch:
+        src: "{{ item.path }}"
+        dest: "./{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ kubeconfig_files.files }}"
