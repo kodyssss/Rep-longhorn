@@ -9,4 +9,4 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: longhorn
-  volumeName: mysql-pv  # 指定要绑定的longhorn-Dr-PV 的名称
+  volumeName: pvc-1162d1de-c853-40b9-8f6f-55a-83f60f15  # 指定要绑定的longhorn-Dr-PV 的名称
