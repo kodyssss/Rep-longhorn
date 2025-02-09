@@ -1,14 +1,13 @@
 #!/bin/bash
 
-
 # 获取第一个节点的名称
 CLUSTER_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
 
 # 获取 API 服务器地址
-API_SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+API_SERVER=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
 
 # 配置变量
-USERNAME="kody2-${CLUSTER_NAME}"
+USERNAME="demo4-${CLUSTER_NAME}"
 NAMESPACE="default"
 PERMISSION_LEVEL="cluster-readonly"  # 可选 namespace 或 cluster-readonly
 CA_CERT_PATH="/var/lib/rancher/rke2/server/tls/server-ca.crt"  # 指定CA证书路径
@@ -30,8 +29,19 @@ spec:
   usages:
   - client auth
 EOF
+
 kubectl certificate approve ${USERNAME}-csr
-kubectl get csr ${USERNAME}-csr -o jsonpath='{.status.certificate}' | base64 -d > ${USERNAME}.crt
+
+# 等待CSR被批准并获取证书
+while true; do
+  CERT=$(kubectl get csr ${USERNAME}-csr -o jsonpath='{.status.certificate}')
+  if [[ -n "$CERT" ]]; then
+    echo "$CERT" | base64 -d > ${USERNAME}.crt
+    break
+  fi
+  echo "等待CSR批准..."
+  sleep 2
+done
 
 # 创建 RBAC 权限
 if [ "$PERMISSION_LEVEL" == "namespace" ]; then
@@ -88,7 +98,7 @@ fi
 
 # 生成 kubeconfig
 kubectl config set-cluster ${CLUSTER_NAME} \
-  --server=${API_SERVER} \
+  --server=https://${API_SERVER}:6443 \
   --certificate-authority=${CA_CERT_PATH} \
   --embed-certs=true \
   --kubeconfig=${USERNAME}.kubeconfig

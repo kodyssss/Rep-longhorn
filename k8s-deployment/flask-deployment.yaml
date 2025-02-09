@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-frontend
+  template:
+    metadata:
+      labels:
+        app: mysql-frontend
+    spec:
+      initContainers:
+      - name: init-mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rancher"
+        command: ['sh', '-c', 'until mysql -h mysql-service -uroot -prancher -e "select 1"; do echo "Waiting for MySQL..."; sleep 5; done']
+      containers:
+      - name: mysql-frontend
+        image: mysql-frontend:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_HOST
+          value: "mysql-service"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          value: "rancher"
+        - name: DB_NAME
+          value: "testdb"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
