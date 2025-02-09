@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-nginx
+spec:
+  selector:
+    app: php-nginx
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 32327
+  type: NodePort
